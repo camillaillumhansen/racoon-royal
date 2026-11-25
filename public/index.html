@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Racoon Royal - vind billetter til Royal Arena</title>
+<meta name="description" content="Vind 2 billetter til Phoebe Bridgers eller Gilli i Royal Arena. En julehilsen fra Racoon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0b0d; --panel:#141418; --line:#26262c;
+    --gold:#d9b45a; --mint:#7fe0c4; --text:#f3f1ec; --muted:#9b9890;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.55;overflow-x:hidden}
+
+  /* Scenelys */
+  .lights{position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(60vw 50vh at 15% -10%, rgba(217,180,90,.22), transparent 60%),
+      radial-gradient(55vw 45vh at 90% -5%, rgba(127,224,196,.16), transparent 60%);}
+  .beam{position:fixed;top:-20vh;width:22vw;height:140vh;pointer-events:none;z-index:0;filter:blur(30px);opacity:.25;transform-origin:top center}
+  .beam.a{left:10vw;background:linear-gradient(var(--gold),transparent 70%);animation:sweep 9s ease-in-out infinite alternate}
+  .beam.b{right:8vw;background:linear-gradient(var(--mint),transparent 70%);animation:sweep 11s ease-in-out infinite alternate-reverse}
+  @keyframes sweep{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+  @media (prefers-reduced-motion: reduce){.beam{animation:none}}
+
+  main{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:56px 22px 80px}
+
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mint);border:1px solid rgba(127,224,196,.4);border-radius:999px;padding:6px 14px}
+  h1{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:clamp(56px,11vw,128px);line-height:.92;margin:22px 0 14px;letter-spacing:.01em}
+  h1 span{color:var(--gold)}
+  .lead{font-size:clamp(17px,2.2vw,20px);max-width:620px;color:#d8d5cd;margin:0}
+  .stats{display:flex;gap:28px;flex-wrap:wrap;margin:30px 0 8px}
+  .stat b{display:block;font-family:Anton,sans-serif;font-weight:400;font-size:38px;color:var(--gold);line-height:1}
+  .stat small{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+
+  /* Koncertkort */
+  .step{font-family:Anton,sans-serif;font-weight:400;font-size:26px;margin:54px 0 6px;letter-spacing:.02em}
+  .step em{font-style:normal;color:var(--gold)}
+  .hint{color:var(--muted);margin:0 0 18px;font-size:15px}
+  .concerts{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:720px){.concerts{grid-template-columns:1fr}}
+  .concert{position:relative;cursor:pointer;display:block;background:var(--panel);border:2px solid var(--line);border-radius:22px;overflow:hidden;transition:border-color .2s, transform .2s, box-shadow .2s}
+  .photo{position:relative;aspect-ratio:3/2;background:#000}
+  .photo img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.05)}
+  .photo::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(20,20,24,.95))}
+  .body{padding:0 24px 24px;margin-top:-58px;position:relative;z-index:1}
+  .when{display:flex;align-items:stretch;gap:0;border-radius:14px;overflow:hidden;margin:16px 0 14px;border:1.5px solid var(--mint)}
+  .when .cal{background:var(--mint);color:#111;text-align:center;padding:8px 14px;min-width:84px}
+  .when .cal small{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+  .when .cal b{display:block;font-family:Anton,sans-serif;font-weight:400;font-size:40px;line-height:1}
+  .when .cal span{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+  .when .txt{flex:1;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;background:rgba(127,224,196,.08)}
+  .when .txt strong{font-size:17px}
+  .when .txt em{font-style:normal;color:var(--muted);font-size:14px}
+  .chosen{margin:8px 0 0;padding-left:20px;color:var(--mint);font-weight:700}
+  .chosen:empty{display:none}
+  .concert:hover{transform:translateY(-3px);border-color:#3a3a42}
+  .concert input{position:absolute;opacity:0;pointer-events:none}
+  .concert .tick{position:absolute;top:16px;right:16px;z-index:2;background:rgba(0,0,0,.45);width:30px;height:30px;border-radius:50%;border:2px solid #44444c;display:grid;place-items:center;font-size:16px;color:transparent;transition:.2s}
+  .concert:has(input:checked){border-color:var(--gold);box-shadow:0 0 0 6px rgba(217,180,90,.12), 0 20px 50px -20px rgba(217,180,90,.45)}
+  .concert:has(input:checked) .tick{background:var(--gold);border-color:var(--gold);color:#111}
+  .concert:has(input:focus-visible){outline:3px solid var(--mint);outline-offset:3px}
+  .concert h3{font-family:Anton,sans-serif;font-weight:400;font-size:clamp(34px,5vw,46px);line-height:1;margin:0}
+  .concert p{margin:0;color:#cfccc4;font-size:15px}
+  .concert .prize{margin-top:18px;padding-top:14px;border-top:1px dashed #33333a;font-size:14px;color:var(--gold);font-weight:500}
+
+  /* Formular */
+  form{margin:0}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:26px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:620px){.fields{grid-template-columns:1fr}}
+  label.f{display:block;font-size:14px;font-weight:500;margin-bottom:6px}
+  label.f small{color:var(--muted);font-weight:400}
+  input[type=text],input[type=email],input[type=tel]{width:100%;background:#0e0e11;border:1.5px solid #2e2e35;color:var(--text);border-radius:12px;padding:13px 14px;font:inherit;font-size:16px;transition:border-color .15s}
+  input:focus{outline:none;border-color:var(--gold)}
+  input::placeholder{color:#5f5d58}
+  .plus{margin-top:22px}
+  .plus .f{display:block;font-size:14px;font-weight:500;margin-bottom:10px}
+  .plus .f small{color:var(--muted);font-weight:400}
+  .chips{display:flex;flex-wrap:wrap;gap:10px}
+  .chips label{cursor:pointer}
+  .chips input{position:absolute;opacity:0;pointer-events:none}
+  .chips span{display:inline-block;padding:10px 16px;border-radius:999px;border:1.5px solid #2e2e35;background:#0e0e11;font-size:15px;transition:.15s}
+  .chips span:hover{border-color:#4a4a52}
+  .chips input:checked + span{border-color:var(--gold);background:rgba(217,180,90,.15);color:var(--gold);font-weight:700}
+  .chips input:focus-visible + span{outline:3px solid var(--mint);outline-offset:2px}
+  .check{display:flex;gap:12px;align-items:flex-start;margin-top:22px;padding:16px;border-radius:14px;background:rgba(127,224,196,.07);border:1px solid rgba(127,224,196,.25);cursor:pointer}
+  .check input{width:22px;height:22px;accent-color:var(--mint);margin:1px 0 0;flex:none}
+  .check span{font-size:15px}
+  .check b{color:var(--mint)}
+  .fine{color:var(--muted);font-size:13px;margin:16px 0 0}
+
+  button{margin-top:26px;width:100%;font:inherit;font-family:Anton,sans-serif;font-size:24px;letter-spacing:.04em;color:#111;background:linear-gradient(135deg,#f0d27e,var(--gold));border:0;border-radius:999px;padding:18px;cursor:pointer;transition:transform .15s, filter .15s}
+  button:hover{transform:translateY(-2px);filter:brightness(1.05)}
+  button:disabled{opacity:.6;cursor:wait;transform:none}
+  .error{display:none;margin-top:14px;color:#ff9b8a;font-size:15px;text-align:center}
+
+  /* Tak-skærm */
+  .done{display:none;text-align:center;padding:40px 10px}
+  .ticket{display:inline-block;margin:10px auto 26px;padding:22px 34px;border-radius:16px;background:linear-gradient(135deg,#f0d27e,var(--gold));color:#111;position:relative;transform:rotate(-3deg);box-shadow:0 30px 60px -20px rgba(217,180,90,.5)}
+  .ticket::before,.ticket::after{content:"";position:absolute;top:50%;width:26px;height:26px;border-radius:50%;background:var(--bg);transform:translateY(-50%)}
+  .ticket::before{left:-13px}.ticket::after{right:-13px}
+  .ticket small{display:block;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+  .ticket strong{font-family:Anton,sans-serif;font-weight:400;font-size:44px;line-height:1.1}
+  .done h2{font-family:Anton,sans-serif;font-weight:400;font-size:clamp(38px,6vw,56px);margin:0 0 10px}
+  .done p{color:#d8d5cd;max-width:520px;margin:0 auto 10px}
+
+  .closed{display:none}
+  footer{position:relative;z-index:1;text-align:center;color:var(--muted);font-size:13px;padding:0 20px 40px}
+  footer b{color:var(--text);letter-spacing:.08em}
+  canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:5}
+</style>
+</head>
+<body>
+<div class="lights"></div><div class="beam a"></div><div class="beam b"></div>
+<canvas id="confetti"></canvas>
+
+<main>
+  <section id="intro">
+    <span class="eyebrow">🎄 En julehilsen fra Racoon</span>
+    <h1>Racoon<br><span>Royal</span></h1>
+    <p class="lead">Vi har sikret os billetter til to af decembers største aftener i Royal Arena. Nu skal de ud til nogle af dem, vi er allermest glade for at arbejde sammen med. Vælg din koncert og få et lod i lodtrækningen.</p>
+    <div class="stats">
+      <div class="stat"><b>2</b><small>koncerter</small></div>
+      <div class="stat"><b>4</b><small>vindere</small></div>
+      <div class="stat"><b>8</b><small>billetter</small></div>
+    </div>
+  </section>
+
+  <div id="flow">
+    <form id="form" novalidate>
+      <h2 class="step"><em>01</em> Vælg din aften</h2>
+      <p class="hint">Du kan vælge én eller begge - så har du et lod i hver lodtrækning.</p>
+
+      <div class="concerts">
+        <label class="concert">
+          <input type="checkbox" name="valg" value="phoebe">
+          <span class="tick">✓</span>
+          <div class="photo"><img src="/phoebe.jpg" alt="Phoebe Bridgers på scenen med guitar"></div>
+          <div class="body">
+            <h3>Phoebe Bridgers</h3>
+            <div class="when">
+              <div class="cal"><small>Fredag</small><b>11</b><span>December</span></div>
+              <div class="txt"><strong>Fredag d. 11. december 2026</strong><em>Kl. 20.00 · Royal Arena</em></div>
+            </div>
+            <p>En af sin generations vigtigste stemmer vender tilbage på The Lost Tour. Gribende indiefolk, skarp humor og hendes største danske indendørskoncert til dato.</p>
+            <div class="prize">🎟 2 × 2 billetter</div>
+          </div>
+        </label>
+
+        <label class="concert">
+          <input type="checkbox" name="valg" value="gilli">
+          <span class="tick">✓</span>
+          <div class="photo"><img src="/gilli.jpg" alt="Gilli på scenen med mikrofon"></div>
+          <div class="body">
+            <h3>Gilli</h3>
+            <div class="when">
+              <div class="cal"><small>Fredag</small><b>18</b><span>December</span></div>
+              <div class="txt"><strong>Fredag d. 18. december 2026</strong><em>Kl. 20.00 · Royal Arena</em></div>
+            </div>
+            <p>Over 2 milliarder streams og et årti i toppen af hitlisterne. Spansk guitar, afrobeats og baile funk i en arena-aften fyldt med hits.</p>
+            <div class="prize">🎟 2 × 2 billetter</div>
+          </div>
+        </label>
+      </div>
+
+      <h2 class="step"><em>02</em> Hvem er du?</h2>
+      <p class="hint">Så vi ved, hvem vi skal ringe til, hvis du vinder.</p>
+
+      <div class="panel">
+        <div class="fields">
+          <div><label class="f" for="navn">Dit fulde navn</label><input type="text" id="navn" autocomplete="name" placeholder="fx Per Hansen" required></div>
+          <div><label class="f" for="firma">Hvor kommer du fra?</label><input type="text" id="firma" autocomplete="organization" placeholder="fx CEJ" required></div>
+          <div><label class="f" for="email">Email</label><input type="email" id="email" autocomplete="email" required></div>
+          <div><label class="f" for="telefon">Telefon <small>(valgfri)</small></label><input type="tel" id="telefon" autocomplete="tel"></div>
+        </div>
+
+        <div class="plus">
+          <span class="f">Hvem vil du tage med? <small>(du får 2 billetter - intet navn nødvendigt)</small></span>
+          <div class="chips">
+            <label><input type="radio" name="plusone" value="Kollega"><span>💼 Min kollega</span></label>
+            <label><input type="radio" name="plusone" value="Partner"><span>💛 Min kone / mand / kæreste</span></label>
+            <label><input type="radio" name="plusone" value="Ven"><span>🙌 En ven</span></label>
+            <label><input type="radio" name="plusone" value="Familie"><span>👨‍👩‍👧 Familie</span></label>
+            <label><input type="radio" name="plusone" value="Ved ikke endnu"><span>🤷 Ved ikke endnu</span></label>
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="kanDagen">
+          <span><b>Jeg kan på dagen.</b> Jeg har tjekket kalenderen og kan deltage i den eller de koncerter, jeg har valgt:
+            <ul class="chosen" id="chosen"></ul></span>
+        </label>
+
+        <p class="fine">Vi trækker lod blandt alle tilmeldte og kontakter vinderne i næste uge. Dine oplysninger bruges kun til lodtrækningen og slettes, når billetterne er givet videre.</p>
+
+        <button type="submit" id="submit">Giv mig et lod 🎟</button>
+        <div class="error" id="error"></div>
+      </div>
+    </form>
+  </div>
+
+  <section class="done" id="done">
+    <div class="ticket"><small>Racoon Royal · Lod</small><strong id="ticketName">Du er med!</strong></div>
+    <h2>Du er i hatten 🎉</h2>
+    <p id="doneText">Vi trækker lod i næste uge og giver vinderne besked direkte.</p>
+    <p>Krydser fingre for dig. Glædelig jul fra alle os i Racoon.</p>
+  </section>
+
+  <section class="done closed" id="closed">
+    <h2>Lodtrækningen er lukket</h2>
+    <p>Tak til alle, der var med. Vinderne har fået direkte besked.</p>
+  </section>
+</main>
+
+<footer><b>RACOON</b> · Vi ses i Royal Arena</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const NAMES = { phoebe: "Phoebe Bridgers", gilli: "Gilli" };
+const DATES = { phoebe: "fredag d. 11. december 2026 kl. 20.00", gilli: "fredag d. 18. december 2026 kl. 20.00" };
+
+function updateChosen() {
+  const valg = [...document.querySelectorAll('input[name=valg]:checked')].map(i => i.value);
+  $("chosen").innerHTML = valg.map(k => `<li>${NAMES[k]} - ${DATES[k]}</li>`).join("");
+}
+document.querySelectorAll('input[name=valg]').forEach(i => i.addEventListener("change", updateChosen));
+
+fetch("/api/status").then(r => r.json()).then(s => {
+  if (!s.open) { $("flow").style.display = "none"; $("closed").style.display = "block"; }
+}).catch(() => {});
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("error");
+  err.style.display = "none";
+  const valg = [...document.querySelectorAll('input[name=valg]:checked')].map(i => i.value);
+  const data = {
+    navn: $("navn").value.trim(), firma: $("firma").value.trim(),
+    email: $("email").value.trim(), telefon: $("telefon").value.trim(),
+    plusone: (document.querySelector('input[name=plusone]:checked') || {}).value || "",
+    valg, kanDagen: $("kanDagen").checked
+  };
+  const fail = (msg) => { err.textContent = msg; err.style.display = "block"; };
+  if (!valg.length) return fail("Vælg mindst én koncert øverst på siden.");
+  if (!data.navn || !data.firma || !data.email) return fail("Udfyld dit navn, hvor du kommer fra og din email.");
+  if (data.navn.split(/\s+/).length < 2) return fail("Skriv gerne dit fulde navn, fx Per Hansen.");
+  if (!data.plusone) return fail("Vælg hvem du vil tage med.");
+  if (!data.kanDagen) return fail("Sæt kryds ved, at du kan på dagen.");
+
+  const btn = $("submit");
+  btn.disabled = true; btn.textContent = "Et øjeblik…";
+  try {
+    const r = await fetch("/api/tilmeld", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const res = await r.json();
+    if (!r.ok) throw new Error(res.error || "Noget gik galt.");
+    $("flow").style.display = "none";
+    $("intro").style.display = "none";
+    $("done").style.display = "block";
+    $("ticketName").textContent = valg.map(k => NAMES[k]).join(" + ");
+    $("doneText").textContent = (res.opdateret ? "Vi har opdateret dit lod. " : "") +
+      "Du er med i lodtrækningen til " + valg.map(k => `${NAMES[k]} (${DATES[k]})`).join(" og ") + "." +
+      " Vi trækker lod i næste uge og giver vinderne besked direkte.";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    confetti();
+  } catch (ex) {
+    fail(ex.message);
+    btn.disabled = false; btn.textContent = "Giv mig et lod 🎟";
+  }
+});
+
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = $("confetti"), ctx = c.getContext("2d");
+  c.width = innerWidth; c.height = innerHeight;
+  const cols = ["#d9b45a", "#f0d27e", "#7fe0c4", "#ffffff"];
+  const ps = Array.from({ length: 160 }, () => ({
+    x: Math.random() * c.width, y: -20 - Math.random() * c.height * .5,
+    w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+    vy: 2 + Math.random() * 3, vx: -1.5 + Math.random() * 3,
+    r: Math.random() * 6, vr: -.1 + Math.random() * .2, col: cols[(Math.random() * 4) | 0]
+  }));
+  let t = 0;
+  (function tick() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    ps.forEach(p => { p.y += p.vy; p.x += p.vx; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.col;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore(); });
+    if (++t < 260) requestAnimationFrame(tick); else ctx.clearRect(0, 0, c.width, c.height);
+  })();
+}
+</script>
+</body>
+</html>
